@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.cqmc.badgeradiobutton.MainActivity">
+
+    <com.cqmc.badgeradiobutton.widget.MeasureTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:text="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        android:textSize="21sp"/>
+
+    <com.cqmc.badgeradiobutton.widget.MeasureTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:paddingTop="10dp"
+        android:text="1234567890"
+        android:textSize="28sp"/>
+
+    <com.cqmc.badgeradiobutton.widget.MeasureTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:text="abcdefghijklmnopqrstuvwxyz"
+        android:textSize="26sp"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal">
+
+        <com.cqmc.badgeradiobutton.widget.BadgeRadioButton
+            android:id="@+id/brb_main_0"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawablePadding="2dp"
+            android:gravity="center"
+            android:drawableTop="@mipmap/ic_main_user_normal"
+            android:text="首页"/>
+
+        <com.cqmc.badgeradiobutton.widget.BadgeRadioButton
+            android:id="@+id/brb_main_1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawablePadding="2dp"
+            android:drawableTop="@mipmap/ic_main_user_normal"
+            android:gravity="center"
+            android:text="首页"/>
+
+        <com.cqmc.badgeradiobutton.widget.BadgeRadioButton
+            android:id="@+id/brb_main_2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawablePadding="2dp"
+            android:drawableTop="@mipmap/ic_main_user_normal"
+            android:gravity="center"
+            android:text="首页"/>
+
+        <com.cqmc.badgeradiobutton.widget.BadgeRadioButton
+            android:id="@+id/brb_main_3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawablePadding="2dp"
+            android:drawableTop="@mipmap/ic_main_user_normal"
+            android:gravity="center"
+            android:text="首页"/>
+    </RadioGroup>
+</LinearLayout>
