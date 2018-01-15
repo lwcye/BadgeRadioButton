@@ -13,6 +13,7 @@ import android.support.annotation.ColorInt;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 
 
@@ -32,9 +33,11 @@ import android.view.View;
  * setBadgeOffX -- 设置X的偏移量
  * setBadgeOffY -- 设置Y的偏移量
  * -------------------------------------------------------------------------------------------------
- * @modified -
- * @date -
+ * @modified - lwc
+ * @date - 2017/12/14
  * @note -
+ * setBadgeText -- 设置文本
+ * setBadgeGravity -- 设置标记的位置
  */
 public class BadgeRadioButton extends DrawableCenterRadioButton {
     /** 字体高度 */
@@ -71,6 +74,8 @@ public class BadgeRadioButton extends DrawableCenterRadioButton {
     private boolean mBadgeExact;
     /** 背景矩形 */
     private RectF mBadgeBackgroundRect;
+    /** 位置，默认中心 */
+    private int mGravity = Gravity.CENTER;
 
     /**
      * 构造函数
@@ -105,28 +110,107 @@ public class BadgeRadioButton extends DrawableCenterRadioButton {
         init();
     }
 
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         if (null != mDrawableBackground && null != mBadgeText) {
             showShadowImpl(mBadgeShowShadow, mBadgeBackgroundPaint);
             float maxPadding = getOffSize();
             if (mBadgePadding > maxPadding) {
-                mBadgeOffY = (int) (mBadgePadding - maxPadding);
+                if (mBadgePadding - maxPadding > mBadgeOffY) {
+                    mBadgeOffY = (int) (mBadgePadding - maxPadding);
+                }
             }
-            if (mBadgeText.length() == 0) {
-                canvas.drawCircle((getWidth() + mDrawableBackground.getIntrinsicWidth()) / 2 + mBadgeOffX, mFontHeight / 2 + mBadgeOffY, mFontHeight / 2 + mBadgePadding, mBadgeBackgroundPaint);
-            } else if (mBadgeText.length() <= 1) {
-                canvas.drawCircle((getWidth() + mDrawableBackground.getIntrinsicWidth()) / 2 + mBadgeOffX, mFontHeight / 2 + mBadgeOffY, mFontHeight / 2 + mBadgePadding, mBadgeBackgroundPaint);
-            } else {
-                mBadgeBackgroundRect.left = (getWidth() + mDrawableBackground.getIntrinsicWidth()) / 2 - mFontWidth / 2 - mBadgePadding + mBadgeOffX;
-                mBadgeBackgroundRect.right = (getWidth() + mDrawableBackground.getIntrinsicWidth()) / 2 + mFontWidth / 2 + mBadgePadding + mBadgeOffX;
-                mBadgeBackgroundRect.top = -mBadgePadding + mBadgeOffY;
-                mBadgeBackgroundRect.bottom = mFontHeight + mBadgePadding + mBadgeOffY;
-                canvas.drawRoundRect(mBadgeBackgroundRect, mFontHeight / 2 + mBadgePadding, mFontHeight / 2 + mBadgePadding, mBadgeBackgroundPaint);
+            drawWithDrawable(canvas);
+        } else if (null == mDrawableBackground && null != mBadgeText) {
+            showShadowImpl(mBadgeShowShadow, mBadgeBackgroundPaint);
+            float maxPadding = getOffSize();
+            if (mBadgePadding > maxPadding) {
+                if (mBadgePadding - maxPadding > mBadgeOffY) {
+                    mBadgeOffY = (int) (mBadgePadding - maxPadding);
+                }
             }
+            drawWithNoDrawable(canvas);
+        }
+    }
+
+    /**
+     * 无图标时候，绘制标签
+     *
+     * @param canvas 画布
+     */
+    private void drawWithNoDrawable(Canvas canvas) {
+        float textWidth = getPaint().measureText(getText().toString());
+        if (mBadgeText.length() == 0) {
+            //绘制圆
+            if (mGravity == Gravity.CENTER) {
+                canvas.drawCircle((getWidth() + textWidth) / 2 + mBadgeOffX, mFontHeight / 2 + mBadgeOffY, mFontHeight / 2 + mBadgePadding, mBadgeBackgroundPaint);
+            } else if (mGravity == Gravity.RIGHT) {
+                canvas.drawCircle(getWidth() - mFontWidth / 2 - mBadgePadding, mFontHeight / 2 + mBadgeOffY, mFontHeight / 2 + mBadgePadding, mBadgeBackgroundPaint);
+            } else if (mGravity == Gravity.LEFT) {
+                canvas.drawCircle(mFontWidth / 2 + mBadgePadding, mFontHeight / 2 + mBadgeOffY, mFontHeight / 2 + mBadgePadding, mBadgeBackgroundPaint);
+            }
+        } else {
+            //多个字符，绘制椭圆
+            mBadgeBackgroundRect.left = (getWidth() + textWidth) / 2 - mFontWidth / 2 - mBadgePadding + mBadgeOffX;
+            mBadgeBackgroundRect.right = (getWidth() + textWidth) / 2 + mFontWidth / 2 + mBadgePadding + mBadgeOffX;
+            mBadgeBackgroundRect.top = -mBadgePadding + mBadgeOffY;
+            mBadgeBackgroundRect.bottom = mFontHeight + mBadgePadding + mBadgeOffY;
+            if (mGravity == Gravity.RIGHT) {
+                mBadgeBackgroundRect.left = getWidth() - mFontWidth - mBadgePadding * 2;
+                mBadgeBackgroundRect.right = getWidth();
+            } else if (mGravity == Gravity.LEFT) {
+                mBadgeBackgroundRect.left = 0;
+                mBadgeBackgroundRect.right = mFontWidth + mBadgePadding * 2;
+            }
+            canvas.drawRoundRect(mBadgeBackgroundRect, mFontHeight / 2 + mBadgePadding, mFontHeight / 2 + mBadgePadding, mBadgeBackgroundPaint);
+        }
+        //绘制文本
+        if (mGravity == Gravity.RIGHT) {
+            canvas.drawText(mBadgeText, getWidth() - mFontWidth - mBadgePadding, mFontHeight + mBadgeOffY, mBadgeTextPaint);
+        } else if (mGravity == Gravity.LEFT) {
+            canvas.drawText(mBadgeText, mBadgePadding, mFontHeight + mBadgeOffY, mBadgeTextPaint);
+        } else {
+            canvas.drawText(mBadgeText, (getWidth() + textWidth) / 2 - mFontWidth / 2 + mBadgeOffX, mFontHeight + mBadgeOffY, mBadgeTextPaint);
+        }
+    }
+
+    /**
+     * 有图标时候，绘制标签
+     *
+     * @param canvas 画布
+     */
+    private void drawWithDrawable(Canvas canvas) {
+        if (mBadgeText.length() == 0) {
+            //绘制圆
+            if (mGravity == Gravity.CENTER) {
+                canvas.drawCircle((getWidth() + mDrawableBackground.getIntrinsicWidth()) / 2 + mBadgeOffX, mFontHeight / 2 + mBadgeOffY, mFontHeight / 2 + mBadgePadding, mBadgeBackgroundPaint);
+            } else if (mGravity == Gravity.RIGHT) {
+                canvas.drawCircle(getWidth() - mFontWidth / 2 - mBadgePadding, mFontHeight / 2 + mBadgeOffY, mFontHeight / 2 + mBadgePadding, mBadgeBackgroundPaint);
+            } else if (mGravity == Gravity.LEFT) {
+                canvas.drawCircle(mFontWidth / 2 + mBadgePadding, mFontHeight / 2 + mBadgeOffY, mFontHeight / 2 + mBadgePadding, mBadgeBackgroundPaint);
+            }
+        } else {
+            //多个字符，绘制椭圆
+            mBadgeBackgroundRect.left = (getWidth() + mDrawableBackground.getIntrinsicWidth()) / 2 - mFontWidth / 2 - mBadgePadding + mBadgeOffX;
+            mBadgeBackgroundRect.right = (getWidth() + mDrawableBackground.getIntrinsicWidth()) / 2 + mFontWidth / 2 + mBadgePadding + mBadgeOffX;
+            mBadgeBackgroundRect.top = -mBadgePadding + mBadgeOffY;
+            mBadgeBackgroundRect.bottom = mFontHeight + mBadgePadding + mBadgeOffY;
+            if (mGravity == Gravity.RIGHT) {
+                mBadgeBackgroundRect.left = getWidth() - mFontWidth - mBadgePadding * 2;
+                mBadgeBackgroundRect.right = getWidth();
+            } else if (mGravity == Gravity.LEFT) {
+                mBadgeBackgroundRect.left = 0;
+                mBadgeBackgroundRect.right = mFontWidth + mBadgePadding * 2;
+            }
+            canvas.drawRoundRect(mBadgeBackgroundRect, mFontHeight / 2 + mBadgePadding, mFontHeight / 2 + mBadgePadding, mBadgeBackgroundPaint);
+        }
+        //绘制文本
+        if (mGravity == Gravity.RIGHT) {
+            canvas.drawText(mBadgeText, getWidth() - mFontWidth - mBadgePadding, mFontHeight + mBadgeOffY, mBadgeTextPaint);
+        } else if (mGravity == Gravity.LEFT) {
+            canvas.drawText(mBadgeText, mBadgePadding, mFontHeight + mBadgeOffY, mBadgeTextPaint);
+        } else {
             canvas.drawText(mBadgeText, (getWidth() + mDrawableBackground.getIntrinsicWidth()) / 2 - mFontWidth / 2 + mBadgeOffX, mFontHeight + mBadgeOffY, mBadgeTextPaint);
         }
     }
@@ -147,6 +231,23 @@ public class BadgeRadioButton extends DrawableCenterRadioButton {
         } else if (mBadgeNumber == 0) {
             mBadgeText = "";
         }
+        return invalidateLayout();
+    }
+
+    /**
+     * 设置显示数字
+     *
+     * @param badge 标记文本
+     */
+    public BadgeRadioButton setBadgeText(String badge) {
+        mBadgeText = badge;
+        return invalidateLayout();
+    }
+
+    /**
+     * 重新刷新界面
+     */
+    private BadgeRadioButton invalidateLayout() {
         if (!TextUtils.isEmpty(mBadgeText)) {
             measureText();
         }
@@ -226,7 +327,18 @@ public class BadgeRadioButton extends DrawableCenterRadioButton {
     public BadgeRadioButton setBadgeTextSize(float badgeTextSize) {
         mBadgeTextSize = badgeTextSize;
         mBadgeTextPaint.setTextSize(mBadgeTextSize);
-        return setBadgeNumber(mBadgeNumber);
+        return invalidateLayout();
+    }
+
+    /**
+     * 设置标记的位置
+     * 目前仅支持Gravity.LEFT Gravity.RIGHT Gravity.CENTER，默认Gravity.CENTER
+     *
+     * @param gravity {@link Gravity}
+     */
+    public BadgeRadioButton setBadgeGravity(int gravity) {
+        mGravity = gravity;
+        return invalidateLayout();
     }
 
     /**
@@ -236,7 +348,7 @@ public class BadgeRadioButton extends DrawableCenterRadioButton {
      */
     public BadgeRadioButton setBadgePadding(int badgePadding) {
         mBadgePadding = badgePadding;
-        return setBadgeNumber(mBadgeNumber);
+        return invalidateLayout();
     }
 
     /**
@@ -246,7 +358,7 @@ public class BadgeRadioButton extends DrawableCenterRadioButton {
      */
     public BadgeRadioButton setBadgeShowShadow(boolean badgeShowShadow) {
         mBadgeShowShadow = badgeShowShadow;
-        return setBadgeNumber(mBadgeNumber);
+        return invalidateLayout();
     }
 
     /**
@@ -257,7 +369,7 @@ public class BadgeRadioButton extends DrawableCenterRadioButton {
     public BadgeRadioButton setBadgeColorBackground(@ColorInt int badgeColorBackground) {
         mBadgeColorBackground = badgeColorBackground;
         mBadgeBackgroundPaint.setColor(mBadgeColorBackground);
-        return setBadgeNumber(mBadgeNumber);
+        return invalidateLayout();
     }
 
     /**
@@ -268,7 +380,7 @@ public class BadgeRadioButton extends DrawableCenterRadioButton {
     public BadgeRadioButton setBadgeColorBadgeText(int badgeColorBadgeText) {
         mBadgeColorBadgeText = badgeColorBadgeText;
         mBadgeTextPaint.setColor(mBadgeColorBadgeText);
-        return setBadgeNumber(mBadgeNumber);
+        return invalidateLayout();
     }
 
     /**
@@ -278,7 +390,7 @@ public class BadgeRadioButton extends DrawableCenterRadioButton {
      */
     public BadgeRadioButton setBadgeOffX(int badgeOffX) {
         mBadgeOffX = badgeOffX;
-        return setBadgeNumber(mBadgeNumber);
+        return invalidateLayout();
     }
 
     /**
@@ -288,7 +400,7 @@ public class BadgeRadioButton extends DrawableCenterRadioButton {
      */
     public BadgeRadioButton setBadgeOffY(int badgeOffY) {
         mBadgeOffY = badgeOffY;
-        return setBadgeNumber(mBadgeNumber);
+        return invalidateLayout();
     }
 
     /**
@@ -298,7 +410,7 @@ public class BadgeRadioButton extends DrawableCenterRadioButton {
      */
     public BadgeRadioButton setBadgeExact(boolean badgeExact) {
         mBadgeExact = badgeExact;
-        return setBadgeNumber(mBadgeNumber);
+        return invalidateLayout();
     }
 
     /**
